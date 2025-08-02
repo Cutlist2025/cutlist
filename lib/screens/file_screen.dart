@@ -40,7 +40,7 @@ class _FileScreenState extends State<FileScreen> {
   }
 
   Future<void> _createFile() async {
-    if (_fileController.text.isNotEmpty && _contentController.text.isNotEmpty) {
+    if (_fileController.text.isNotEmpty) {
       try {
         await DatabaseHelper().insertFile(
           widget.folderId,

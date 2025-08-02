@@ -1,11 +1,11 @@
 import 'package:cuttinglist/database_helper.dart';
 import 'package:cuttinglist/formulas/cupdoard.dart';
+import 'package:cuttinglist/screens/dialogs/add_item_dialog.dart';
 import 'package:cuttinglist/screens/download_pdf.dart';
 import 'package:cuttinglist/screens/side_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import 'add_item_dialog.dart'; // Import the AddItemDialog file
 
 class CsvDisplayPage extends StatefulWidget {
   final int fileId; // Pass the fileId to load CSV for that specific file
@@ -58,8 +58,11 @@ class _CsvDisplayPageState extends State<CsvDisplayPage> {
             final dbHelper = DatabaseHelper();
             print("itemType: $itemType");
             print("inputs: $inputs");
-            // print("Drawer Hieght: ${inputs['drawerHeight']}");
             final splitValue = inputs['customSplitValue'] ?? 0;
+            String rawDrawerHeight = inputs['drawerHeight']?.toString() ?? '0';
+            int drawerHeight = int.tryParse(rawDrawerHeight) ?? 0;
+
+            int drawers = int.tryParse(inputs['drawers'].toString()) ?? 0;
 
             if (itemType == 'Cupboard') {
               // Insert multiple rows for Cupboard components
@@ -170,8 +173,8 @@ class _CsvDisplayPageState extends State<CsvDisplayPage> {
                   });
                 }
 
-                if (int.tryParse(inputs['drawers'].toString()) != null &&
-                    int.parse(inputs['drawers'].toString()) > 0) {
+                if (int.tryParse(drawers.toString()) != null &&
+                    int.parse(drawers.toString()) > 0) {
                   cupboardComponents.add({
                     'type': 'Cupboard',
                     'length': inputs['length'],
@@ -195,7 +198,7 @@ class _CsvDisplayPageState extends State<CsvDisplayPage> {
                         inputs['length'],
                         inputs['width'],
                         inputs['depth'],
-                        inputs['drawerHeight']),
+                        drawerHeight.toString()),
                     'widthSize': drawerPackFillerWidth(
                         inputs['length'], inputs['width'], inputs['depth']),
                     'qty': 2,
@@ -210,7 +213,7 @@ class _CsvDisplayPageState extends State<CsvDisplayPage> {
                         inputs['length'],
                         inputs['width'],
                         inputs['depth'],
-                        inputs['drawerHeight']),
+                        drawerHeight.toString()),
                     'widthSize': drawerPacksidesWidth(
                         inputs['length'], inputs['width'], inputs['depth']),
                     'qty': 2,
@@ -239,7 +242,7 @@ class _CsvDisplayPageState extends State<CsvDisplayPage> {
                         inputs['length'], inputs['width'], inputs['depth']),
                     'widthSize': drawerBaseWidth(
                         inputs['length'], inputs['width'], inputs['depth']),
-                    'qty': inputs['drawers'],
+                    'qty': drawers,
                     'panel': 'Drawer Bases'
                   });
 
@@ -251,8 +254,8 @@ class _CsvDisplayPageState extends State<CsvDisplayPage> {
                     'lengthSize': drawerFrontBackHeight(
                         inputs['length'], inputs['width'], inputs['depth']),
                     'widthSize': drawerFrontBackWidth(
-                        inputs['drawerHeight'], inputs['drawers']),
-                    'qty': (2 * int.parse(inputs['drawers'])).toString(),
+                        drawerHeight.toString(), drawers.toString()),
+                    'qty': (2 * int.parse(drawers.toString())).toString(),
                     'panel': 'Drawer Front/Back'
                   });
                   cupboardComponents.add({
@@ -263,8 +266,8 @@ class _CsvDisplayPageState extends State<CsvDisplayPage> {
                     'lengthSize': drawerSidesHeight(
                         inputs['length'], inputs['width'], inputs['depth']),
                     'widthSize': drawerSidesWidth(
-                        inputs['drawerHeight'], inputs['drawers']),
-                    'qty': (2 * int.parse(inputs['drawers'])).toString(),
+                        drawerHeight.toString(), drawers.toString()),
+                    'qty': (2 * int.parse(drawers.toString())).toString(),
                     'panel': 'Drawer Sides'
                   });
                 }
@@ -287,9 +290,9 @@ class _CsvDisplayPageState extends State<CsvDisplayPage> {
                     'panel': 'Shelves'
                   });
                 }
+                // int? drawers = int.tryParse(drawers.toString() ?? '');
 
-                if (int.tryParse(inputs['drawers'].toString()) != null &&
-                    int.parse(inputs['drawers'].toString()) > 0) {
+                if (drawers != null && drawers > 0) {
                   cupboardComponents.add({
                     'type': 'Cupboard',
                     'length': inputs['length'],
@@ -313,7 +316,7 @@ class _CsvDisplayPageState extends State<CsvDisplayPage> {
                         inputs['length'],
                         inputs['width'],
                         inputs['depth'],
-                        inputs['drawerHeight']),
+                        drawerHeight.toString()),
                     'widthSize': drawerPackFillerWidth(
                         inputs['length'], inputs['width'], inputs['depth']),
                     'qty': 2,
@@ -328,7 +331,7 @@ class _CsvDisplayPageState extends State<CsvDisplayPage> {
                         inputs['length'],
                         inputs['width'],
                         inputs['depth'],
-                        inputs['drawerHeight']),
+                        drawerHeight.toString()),
                     'widthSize': drawerPacksidesWidth(
                         inputs['length'], inputs['width'], inputs['depth']),
                     'qty': 2,
@@ -357,7 +360,7 @@ class _CsvDisplayPageState extends State<CsvDisplayPage> {
                         inputs['length'], inputs['width'], inputs['depth']),
                     'widthSize': drawerBaseWidth(
                         inputs['length'], inputs['width'], inputs['depth']),
-                    'qty': inputs['drawers'],
+                    'qty': drawers,
                     'panel': 'Drawer Bases'
                   });
 
@@ -369,8 +372,8 @@ class _CsvDisplayPageState extends State<CsvDisplayPage> {
                     'lengthSize': drawerFrontBackHeight(
                         inputs['length'], inputs['width'], inputs['depth']),
                     'widthSize': drawerFrontBackWidth(
-                        inputs['drawerHeight'], inputs['drawers']),
-                    'qty': (2 * int.parse(inputs['drawers'])).toString(),
+                        drawerHeight.toString(), drawers.toString()),
+                    'qty': (2 * int.parse(drawers.toString())).toString(),
                     'panel': 'Drawer Front/Back'
                   });
                   cupboardComponents.add({
@@ -381,8 +384,8 @@ class _CsvDisplayPageState extends State<CsvDisplayPage> {
                     'lengthSize': drawerSidesHeight(
                         inputs['length'], inputs['width'], inputs['depth']),
                     'widthSize': drawerSidesWidth(
-                        inputs['drawerHeight'], inputs['drawers']),
-                    'qty': (2 * int.parse(inputs['drawers'])).toString(),
+                        drawerHeight.toString(), drawers.toString()),
+                    'qty': (2 * int.parse(drawers.toString())).toString(),
                     'panel': 'Drawer Sides'
                   });
                 }
