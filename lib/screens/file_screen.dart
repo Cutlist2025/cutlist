@@ -1,4 +1,5 @@
 import 'package:cuttinglist/screens/only_canva.dart';
+import 'package:cuttinglist/screens/side_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cuttinglist/database_helper.dart';
@@ -97,6 +98,7 @@ class _FileScreenState extends State<FileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Project List")),
+      drawer: SidePanel(optionSet: [1, 2, 3, 4]),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListView.builder(

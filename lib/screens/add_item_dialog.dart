@@ -27,7 +27,7 @@ class _AddItemDialogState extends State<AddItemDialog> {
   String cupboardSplitOption = 'No Split';
   String? drawerSizeOption = 'Same Size';
   // int? customSplitValue = 0;
-  int? customSplitValue = 0;
+  int? customSplitValue;
 
   String hasHorizontalSplit = 'No';
   String horizontalSplitPosition = 'Top';

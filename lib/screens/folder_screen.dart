@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cuttinglist/database_helper.dart';
+import 'package:cuttinglist/screens/side_panel.dart';
 import 'file_screen.dart';
 
 class FolderListScreen extends StatefulWidget {
@@ -42,6 +43,7 @@ class _FolderListScreenState extends State<FolderListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Client Folders")),
+      drawer: SidePanel(optionSet: [1, 2, 3, 4]),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: GridView.builder(

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'models/material_config.dart';
 import 'package:cuttinglist/screens/only_canva.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -71,6 +72,27 @@ class DatabaseHelper {
             FOREIGN KEY(file_id) REFERENCES files(id) ON DELETE CASCADE
           )
         ''');
+
+        await db.execute('''
+  CREATE TABLE IF NOT EXISTS material_config (
+    id INTEGER PRIMARY KEY,
+    boardThickness INTEGER,
+    shelfReduction INTEGER,
+    doorReductionWidth INTEGER,
+    doorReductionHeight INTEGER,
+    drawerFillerWidth INTEGER
+  )
+''');
+
+        // Insert default config on first launch
+        await db.insert('material_config', {
+          'id': 1,
+          'boardThickness': 18,
+          'shelfReduction': 30,
+          'doorReductionWidth': 4,
+          'doorReductionHeight': 4,
+          'drawerFillerWidth': 35,
+        });
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -244,5 +266,29 @@ class DatabaseHelper {
     );
 
     return pages;
+  }
+
+//  Material Config Methods
+
+  Future<void> saveMaterialConfig(MaterialConfig config) async {
+    final db = await database;
+    await db.insert(
+      'material_config',
+      config.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<MaterialConfig?> getMaterialConfig() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'material_config',
+      where: 'id = ?',
+      whereArgs: [1],
+    );
+    if (maps.isNotEmpty) {
+      return MaterialConfig.fromMap(maps.first);
+    }
+    return null;
   }
 }
