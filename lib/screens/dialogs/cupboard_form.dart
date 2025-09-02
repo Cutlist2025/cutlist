@@ -182,21 +182,60 @@ class CupboardFormState extends State<CupboardForm> {
               keyboardType: TextInputType.number))
       ],
       if (cupboardSplitOption == 'Split Half') ...[
-        TextField(
-            controller: leftSlabsController,
-            decoration: InputDecoration(labelText: 'Left Slabs'),
-            keyboardType: TextInputType.number),
-        TextField(
-            controller: drawersController,
-            decoration: InputDecoration(labelText: 'Left Drawers'),
-            keyboardType: TextInputType.number),
-        TextField(
-            controller: rightSlabsController,
-            decoration: InputDecoration(labelText: 'Right Slabs'),
-            keyboardType: TextInputType.number),
-        TextField(
-            decoration: InputDecoration(labelText: 'Right Drawers'),
-            keyboardType: TextInputType.number),
+        ...List.generate(
+          2,
+          (i) => Column(children: [
+            Text(i == 0 ? 'Left Section (5/10)' : 'Right Section (5/10)'),
+            TextField(
+                controller: customSlabsControllers.putIfAbsent(
+                    i, () => TextEditingController()),
+                decoration: InputDecoration(labelText: 'Slabs'),
+                keyboardType: TextInputType.number),
+            TextField(
+                controller: customDrawersControllers.putIfAbsent(
+                    i, () => TextEditingController()),
+                decoration: InputDecoration(labelText: 'Drawers'),
+                keyboardType: TextInputType.number,
+                onChanged: (val) {
+                  setState(() {
+                    final num = int.tryParse(val) ?? 0;
+                    customIndividualHeightControllers[i] = {};
+                    for (int j = 0; j < num; j++) {
+                      customIndividualHeightControllers[i]![j] =
+                          TextEditingController();
+                    }
+                  });
+                }),
+            Row(children: [
+              Radio(
+                  value: 'Same Size',
+                  groupValue: customDrawerSizeOptions[i],
+                  onChanged: (val) =>
+                      setState(() => customDrawerSizeOptions[i] = val!)),
+              Text('Same Size'),
+              Radio(
+                  value: 'Different Size',
+                  groupValue: customDrawerSizeOptions[i],
+                  onChanged: (val) =>
+                      setState(() => customDrawerSizeOptions[i] = val!)),
+              Text('Different Size'),
+            ]),
+            if (customDrawerSizeOptions[i] == 'Same Size')
+              TextField(
+                  controller: customSameHeightControllers.putIfAbsent(
+                      i, () => TextEditingController()),
+                  decoration: InputDecoration(labelText: 'Drawer Pack Height'),
+                  keyboardType: TextInputType.number),
+            if (customDrawerSizeOptions[i] == 'Different Size')
+              ...customIndividualHeightControllers[i]!.entries.map(
+                    (e) => TextField(
+                        controller: e.value,
+                        decoration: InputDecoration(
+                            labelText: 'Drawer ${e.key + 1} Height'),
+                        keyboardType: TextInputType.number),
+                  )
+          ]),
+        )
       ],
       if (cupboardSplitOption == 'Custom Split') ...[
         DropdownButton<int>(

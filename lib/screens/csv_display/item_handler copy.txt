@@ -1,0 +1,281 @@
+import '../../database_helper.dart';
+import '../../formulas/cupdoard.dart';
+
+class ItemHandler {
+  static Future<void> handleSave(
+      String itemType, Map<String, dynamic> inputs, int fileId) async {
+    final dbHelper = DatabaseHelper();
+
+    final splitValue = inputs['customSplitValue'] ?? 0;
+    String rawDrawerHeight = inputs['drawerHeights']?.toString() ?? '0';
+    int drawerHeight = int.tryParse(rawDrawerHeight) ?? 0;
+    int drawers = int.tryParse(inputs['drawers'].toString()) ?? 0;
+
+    if (itemType == 'Cupboard') {
+      final List<Map<String, dynamic>> cupboardComponents = [];
+
+      // ✅ Base cupboard panels
+      cupboardComponents.addAll([
+        {
+          'type': 'Cupboard',
+          'length': inputs['length'],
+          'width': inputs['width'],
+          'depth': inputs['depth'],
+          'lengthSize':
+              sideHeight(inputs['length'], inputs['width'], inputs['depth']),
+          'widthSize':
+              sideWidht(inputs['length'], inputs['width'], inputs['depth']),
+          'qty': 2,
+          'panel': 'Sides'
+        },
+        {
+          'type': 'Cupboard',
+          'length': inputs['length'],
+          'width': inputs['width'],
+          'depth': inputs['depth'],
+          'lengthSize': topBottomHieght(
+              inputs['length'], inputs['width'], inputs['depth']),
+          'widthSize': topBottomWidth(
+              inputs['length'], inputs['width'], inputs['depth']),
+          'qty': 2,
+          'panel': 'Top/Bottom'
+        },
+        {
+          'type': 'Cupboard',
+          'length': inputs['length'],
+          'width': inputs['width'],
+          'depth': inputs['depth'],
+          'lengthSize':
+              backHeight(inputs['length'], inputs['width'], inputs['depth']),
+          'widthSize':
+              backWidth(inputs['length'], inputs['width'], inputs['depth']),
+          'qty': 1,
+          'panel': 'Back'
+        },
+        {
+          'type': 'Cupboard',
+          'length': inputs['length'],
+          'width': inputs['width'],
+          'depth': inputs['depth'],
+          'lengthSize':
+              doorHeight(inputs['length'], inputs['width'], inputs['depth']),
+          'widthSize':
+              doorWidth(inputs['length'], inputs['width'], inputs['depth']),
+          'qty': 1,
+          'panel': 'Door'
+        },
+      ]);
+
+      // ✅ Horizontal Split
+      if (inputs['horizontalSplit'] == 'Yes') {
+        if (inputs['horizontalSplitPosition'] == 'Top' ||
+            inputs['horizontalSplitPosition'] == 'Bottom') {
+          cupboardComponents.add({
+            'type': 'Cupboard',
+            'length': inputs['length'],
+            'width': inputs['width'],
+            'depth': inputs['depth'],
+            'lengthSize': inputs['depth'],
+            'widthSize': inputs['depth'],
+            'qty': 1,
+            'panel': 'Horizontal Split Slab'
+          });
+        } else if (inputs['horizontalSplitPosition'] == 'Both') {
+          cupboardComponents.add({
+            'type': 'Cupboard',
+            'length': inputs['length'],
+            'width': inputs['width'],
+            'depth': inputs['depth'],
+            'lengthSize': inputs['depth'],
+            'widthSize': inputs['depth'],
+            'qty': 2,
+            'panel': 'Horizontal Split Slab'
+          });
+        }
+      }
+
+      // ✅ Vertical Split + Slabs + Drawers
+      if (inputs['verticalSplit'] == 'Custom Split' ||
+          inputs['verticalSplit'] == 'Split Half') {
+        cupboardComponents.add({
+          'type': 'Cupboard',
+          'length': inputs['length'],
+          'width': inputs['width'],
+          'depth': inputs['depth'],
+          'lengthSize': inputs['depth'],
+          'widthSize': inputs['depth'],
+          'qty': 1,
+          'panel': 'Full Split'
+        });
+
+        // Slabs
+        int? slabs = int.tryParse(inputs['slabs'].toString());
+        if (slabs != null && slabs > 0) {
+          cupboardComponents.add({
+            'type': 'Cupboard',
+            'length': inputs['length'],
+            'width': inputs['width'],
+            'depth': inputs['depth'],
+            'lengthSize':
+                shelfHeight(inputs['length'], inputs['width'], inputs['depth']),
+            'widthSize':
+                shelfWidth(inputs['length'], inputs['width'], inputs['depth']),
+            'qty': slabs,
+            'panel': 'Shelves'
+          });
+        }
+
+        // Drawers
+        if (drawers > 0) {
+          cupboardComponents
+              .addAll(_drawerComponents(inputs, drawers, drawerHeight));
+        }
+      }
+
+      // ✅ No vertical split → shelves & drawers only
+      if (inputs['verticalSplit'] == 'No Split') {
+        int? slabs = int.tryParse(inputs['slabs'].toString());
+        if (slabs != null && slabs > 0) {
+          cupboardComponents.add({
+            'type': 'Cupboard',
+            'length': inputs['length'],
+            'width': inputs['width'],
+            'depth': inputs['depth'],
+            'lengthSize':
+                shelfHeight(inputs['length'], inputs['width'], inputs['depth']),
+            'widthSize':
+                shelfWidth(inputs['length'], inputs['width'], inputs['depth']),
+            'qty': slabs,
+            'panel': 'Shelves'
+          });
+        }
+
+        if (drawers > 0) {
+          cupboardComponents
+              .addAll(_drawerComponents(inputs, drawers, drawerHeight));
+        }
+      }
+
+      // ✅ Save to DB
+      for (var component in cupboardComponents) {
+        await dbHelper.insertCsvDataForFile(fileId, component);
+      }
+    }
+
+    // ✅ Table item
+    else if (itemType == 'Table') {
+      await dbHelper.insertCsvDataForFile(fileId, {
+        'type': itemType,
+        'length': inputs['length'],
+        'width': inputs['width'],
+        'depth': inputs['depth'],
+        'lengthSize': null,
+        'widthSize': null,
+        'qty': 1,
+        'panel': null,
+      });
+    }
+  }
+
+  /// 🔹 Drawer component generator
+  static List<Map<String, dynamic>> _drawerComponents(
+      Map<String, dynamic> inputs, int drawers, int drawerHeight) {
+    return [
+      {
+        'type': 'Cupboard',
+        'length': inputs['length'],
+        'width': inputs['width'],
+        'depth': inputs['depth'],
+        'lengthSize': drawerPackTopHeight(
+            inputs['length'], inputs['width'], inputs['depth']),
+        'widthSize': drawerPackTopWidth(
+            inputs['length'], inputs['width'], inputs['depth']),
+        'qty': 1,
+        'panel': 'Drawer Pack Top'
+      },
+      {
+        'type': 'Cupboard',
+        'length': inputs['length'],
+        'width': inputs['width'],
+        'depth': inputs['depth'],
+        'lengthSize': drawerPackFillerHeight(inputs['length'], inputs['width'],
+            inputs['depth'], inputs['drawerHeights']),
+        'widthSize': drawerPackFillerWidth(
+            inputs['length'], inputs['width'], inputs['depth']),
+        'qty': 2,
+        'panel': 'Drawer Pack Filler'
+      },
+      {
+        'type': 'Cupboard',
+        'length': inputs['length'],
+        'width': inputs['width'],
+        'depth': inputs['depth'],
+        'lengthSize': drawerPacksidesHeight(inputs['length'], inputs['width'],
+            inputs['depth'], drawerHeight.toString()),
+        'widthSize': drawerPacksidesWidth(
+            inputs['length'], inputs['width'], inputs['depth']),
+        'qty': 2,
+        'panel': 'Drawer Pack Sides'
+      },
+      {
+        'type': 'Cupboard',
+        'length': inputs['length'],
+        'width': inputs['width'],
+        'depth': inputs['depth'],
+        'lengthSize': drawerPackTopBottomHeight(
+            inputs['length'], inputs['width'], inputs['depth']),
+        'widthSize': drawerPackTopBottomWidth(
+            inputs['length'], inputs['width'], inputs['depth']),
+        'qty': 2,
+        'panel': 'Drawer Pack Top/Bottom'
+      },
+      {
+        'type': 'Cupboard',
+        'length': inputs['length'],
+        'width': inputs['width'],
+        'depth': inputs['depth'],
+        'lengthSize': drawerBaseHeight(
+            inputs['length'], inputs['width'], inputs['depth']),
+        'widthSize':
+            drawerBaseWidth(inputs['length'], inputs['width'], inputs['depth']),
+        'qty': drawers,
+        'panel': 'Drawer Bases'
+      },
+      {
+        'type': 'Cupboard',
+        'length': inputs['length'],
+        'width': inputs['width'],
+        'depth': inputs['depth'],
+        'lengthSize': drawerFrontBackHeight(
+            inputs['length'], inputs['width'], inputs['depth']),
+        'widthSize':
+            drawerFrontBackWidth(drawerHeight.toString(), drawers.toString()),
+        'qty': (2 * drawers).toString(),
+        'panel': 'Drawer Front/Back'
+      },
+      {
+        'type': 'Cupboard',
+        'length': inputs['length'],
+        'width': inputs['width'],
+        'depth': inputs['depth'],
+        'lengthSize': drawerSidesHeight(
+            inputs['length'], inputs['width'], inputs['depth']),
+        'widthSize':
+            drawerSidesWidth(drawerHeight.toString(), drawers.toString()),
+        'qty': (2 * drawers).toString(),
+        'panel': 'Drawer Sides'
+      },
+      {
+        'type': 'Cupboard',
+        'length': inputs['length'],
+        'width': inputs['width'],
+        'depth': inputs['depth'],
+        'lengthSize': DrawerFrontsHeight(
+            inputs['drawerHeights'], drawers.toString(), inputs['depth']),
+        'widthSize': DrawerFrontsWidth(inputs['width']),
+        'qty': 1,
+        'panel': 'Drawer Fronts'
+      },
+    ];
+  }
+}

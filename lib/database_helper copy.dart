@@ -56,18 +56,6 @@ class DatabaseHelper {
 
       )
     ''');
-        await db.execute('''
-  CREATE TABLE folder_drawings (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    folder_id INTEGER,
-    page_number INTEGER,
-    path_json TEXT,
-    color TEXT,
-    stroke_width REAL,
-    blend_mode TEXT,
-    FOREIGN KEY(folder_id) REFERENCES folders(id) ON DELETE CASCADE
-  )
-''');
 
         await db.execute('''
           CREATE TABLE csv_data (
@@ -86,7 +74,7 @@ class DatabaseHelper {
         ''');
 
         await db.execute('''
-      CREATE TABLE IF NOT EXISTS material_config (
+  CREATE TABLE IF NOT EXISTS material_config (
     id INTEGER PRIMARY KEY,
     boardThickness INTEGER,
     shelfReduction INTEGER,
@@ -161,7 +149,7 @@ class DatabaseHelper {
     final db = await database;
     return await db.update(
       'files',
-      {'name': content},
+      {'content': content},
       where: 'id = ?',
       whereArgs: [fileId],
     );
@@ -387,44 +375,5 @@ class DatabaseHelper {
     }).toList();
 
     return pages;
-  }
-
-// // ------------------ Folder Drawing Methods ------------------
-
-// Save all lines for a folder
-  Future<void> saveFolderDrawingLines(
-      int folderId, int pageNumber, List<Map<String, dynamic>> lines) async {
-    final db = await database;
-    final batch = db.batch();
-
-    // Clear existing lines for this page
-    await db.delete(
-      'folder_drawings',
-      where: 'folder_id = ? AND page_number = ?',
-      whereArgs: [folderId, pageNumber],
-    );
-
-    for (var line in lines) {
-      batch.insert('folder_drawings', {
-        'folder_id': folderId,
-        'page_number': pageNumber,
-        'path_json': line['path_json'],
-        'color': line['color'],
-        'stroke_width': line['stroke_width'],
-        'blend_mode': line['blend_mode'],
-      });
-    }
-
-    await batch.commit(noResult: true);
-  }
-
-  Future<List<Map<String, dynamic>>> getFolderDrawingLines(
-      int folderId, int pageNumber) async {
-    final db = await DatabaseHelper().database;
-    return await db.query(
-      'folder_drawings',
-      where: 'folder_id = ? AND page_number = ?',
-      whereArgs: [folderId, pageNumber],
-    );
   }
 }

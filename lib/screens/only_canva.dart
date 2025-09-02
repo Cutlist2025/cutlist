@@ -345,4 +345,6 @@ class DrawnLine {
   BlendMode blendMode;
 
   DrawnLine(this.path, this.color, this.width, this.blendMode);
+
+  toMap() {}
 }

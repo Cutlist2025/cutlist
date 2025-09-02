@@ -11,7 +11,6 @@ String sideHeight(String a, String b, String c) {
 
 String sideWidht(String a, String b, String c) {
   int numA = int.parse(c); // Convert input strings to integers
-  // int numB = int.parse(b);
   return (numA).toString(); // Perform subtraction and return as string
 }
 
@@ -122,7 +121,7 @@ String drawerFrontBackHeight(String a, String b, String c) {
 }
 
 String drawerFrontBackWidth(String a, String b) {
-  int numB = (int.parse(a) ~/ int.parse(b)) - 80;
+  int numB = (int.parse(a) ~/ int.parse(b)) - 50;
   return (numB).toString();
 }
 
@@ -132,6 +131,17 @@ String drawerSidesHeight(String a, String b, String c) {
 }
 
 String drawerSidesWidth(String a, String b) {
-  int numB = (int.parse(a) ~/ int.parse(b)) - 80;
+  int numB = (int.parse(a) ~/ int.parse(b)) - 50;
+  return (numB).toString();
+}
+
+String DrawerFrontsHeight(String a, String b, String c) {
+  int numA = (int.parse(a) ~/ int.parse(b)) - 10;
+  return (numA).toString();
+}
+
+String DrawerFrontsWidth(String a) {
+  int numB =
+      int.parse(a) - boardThickness - boardThickness - drawerFillerWidht - 5;
   return (numB).toString();
 }
