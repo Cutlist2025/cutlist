@@ -16,21 +16,32 @@ class MaterialConfig {
   Map<String, dynamic> toMap() {
     return {
       'id': 1,
-      'board_thickness': boardThickness,
-      'shelf_reduction': shelfReduction,
-      'door_reduction_width': doorReductionWidth,
-      'door_reduction_height': doorReductionHeight,
-      'drawer_filler_width': drawerFillerWidth,
+      'boardThickness': boardThickness,
+      'shelfReduction': shelfReduction,
+      'doorReductionWidth': doorReductionWidth,
+      'doorReductionHeight': doorReductionHeight,
+      'drawerFillerWidth': drawerFillerWidth,
     };
   }
 
   factory MaterialConfig.fromMap(Map<String, dynamic> map) {
     return MaterialConfig(
-      boardThickness: map['board_thickness'],
-      shelfReduction: map['shelf_reduction'],
-      doorReductionWidth: map['door_reduction_width'],
-      doorReductionHeight: map['door_reduction_height'],
-      drawerFillerWidth: map['drawer_filler_width'],
+      boardThickness: map['boardThickness'],
+      shelfReduction: map['shelfReduction'],
+      doorReductionWidth: map['doorReductionWidth'],
+      doorReductionHeight: map['doorReductionHeight'],
+      drawerFillerWidth: map['drawerFillerWidth'],
     );
   }
 }
+
+//   factory MaterialConfig.fromMap(Map<String, dynamic> map) {
+//     return MaterialConfig(
+//       boardThickness: map['board_thickness'],
+//       shelfReduction: map['shelf_reduction'],
+//       doorReductionWidth: map['door_reduction_width'],
+//       doorReductionHeight: map['door_reduction_height'],
+//       drawerFillerWidth: map['drawer_filler_width'],
+//     );
+//   }
+// }

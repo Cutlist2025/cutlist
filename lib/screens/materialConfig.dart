@@ -1,7 +1,6 @@
 import 'package:cuttinglist/models/material_config.dart';
 import 'package:flutter/material.dart';
 import '../database_helper.dart';
-// import '../models/material_config_model.dart';
 
 class MaterialConfigScreen extends StatefulWidget {
   @override
@@ -34,12 +33,7 @@ class _MaterialConfigScreenState extends State<MaterialConfigScreen> {
           config.doorReductionHeight.toString();
       _drawerFillerWidthController.text = config.drawerFillerWidth.toString();
     } else {
-      // Set default values
-      _boardThicknessController.text = '18';
-      _shelfReductionController.text = '30';
-      _doorReductionWidthController.text = '4';
-      _doorReductionHeightController.text = '4';
-      _drawerFillerWidthController.text = '35';
+      _resetToDefaults();
     }
     setState(() => _loading = false);
   }
@@ -57,30 +51,40 @@ class _MaterialConfigScreenState extends State<MaterialConfigScreen> {
       await DatabaseHelper().saveMaterialConfig(config);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Configuration saved successfully!')),
+        SnackBar(
+          content: Text('✅ Configuration saved successfully!'),
+          backgroundColor: Colors.green,
+        ),
       );
     }
   }
 
-  Widget _buildNumberField(String label, TextEditingController controller) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(),
+  Widget _buildNumberField(
+      String label, IconData icon, TextEditingController controller) {
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 8),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: TextFormField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: label,
+            prefixIcon: Icon(icon, color: Colors.blueAccent),
+            border: InputBorder.none,
+          ),
+          keyboardType: TextInputType.number,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Enter $label';
+            }
+            if (int.tryParse(value) == null) {
+              return 'Must be a valid number';
+            }
+            return null;
+          },
         ),
-        keyboardType: TextInputType.number,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Enter $label';
-          }
-          if (int.tryParse(value) == null) {
-            return 'Must be a valid number';
-          }
-          return null;
-        },
       ),
     );
   }
@@ -108,7 +112,12 @@ class _MaterialConfigScreenState extends State<MaterialConfigScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Material Configuration')),
+      appBar: AppBar(
+        title: Text('Material Configuration'),
+        centerTitle: true,
+        backgroundColor: Colors.blueAccent,
+        elevation: 4,
+      ),
       body: _loading
           ? Center(child: CircularProgressIndicator())
           : Padding(
@@ -117,24 +126,45 @@ class _MaterialConfigScreenState extends State<MaterialConfigScreen> {
                 key: _formKey,
                 child: ListView(
                   children: [
-                    _buildNumberField(
-                        'Board Thickness', _boardThicknessController),
-                    _buildNumberField(
-                        'Shelf Reduction', _shelfReductionController),
-                    _buildNumberField(
-                        'Door Reduction Width', _doorReductionWidthController),
-                    _buildNumberField('Door Reduction Height',
+                    _buildNumberField('Board Thickness', Icons.layers,
+                        _boardThicknessController),
+                    _buildNumberField('Shelf Reduction',
+                        Icons.dashboard_customize, _shelfReductionController),
+                    _buildNumberField('Door Reduction Width',
+                        Icons.width_normal, _doorReductionWidthController),
+                    _buildNumberField('Door Reduction Height', Icons.height,
                         _doorReductionHeightController),
-                    _buildNumberField(
-                        'Drawer Filler Width', _drawerFillerWidthController),
-                    SizedBox(height: 20),
-                    ElevatedButton(
+                    _buildNumberField('Drawer Filler Width', Icons.view_agenda,
+                        _drawerFillerWidthController),
+                    SizedBox(height: 30),
+                    ElevatedButton.icon(
                       onPressed: _saveConfig,
-                      child: Text('Save Configuration'),
+                      icon: Icon(Icons.save),
+                      label: Text('Save Configuration'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        textStyle: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
                     ),
-                    TextButton(
+                    SizedBox(height: 10),
+                    OutlinedButton.icon(
                       onPressed: _resetToDefaults,
-                      child: Text('Reset to Defaults'),
+                      icon: Icon(Icons.refresh),
+                      label: Text('Reset to Defaults'),
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        side: BorderSide(color: Colors.blueAccent),
+                        textStyle: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ],
                 ),
