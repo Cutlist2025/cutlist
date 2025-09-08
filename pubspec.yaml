@@ -2,7 +2,7 @@ name: cuttinglist
 description: "A new Flutter project."
 publish_to: 'none' # Prevent accidental publishing
 
-version: 1.0.4+2
+version: 1.0.5+2
 
 environment:
   sdk: ">=3.6.0 <4.0.0"
